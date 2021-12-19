@@ -1,6 +1,6 @@
 # The Ray Tracer Challenge - in Lua
 
-This is my implementation of The Ray Tracer Challenge in the Lua language.
+This is my implementation of [The Ray Tracer Challenge](http://raytracerchallenge.com/) in the Lua language.
 
 ## Run tests
 
