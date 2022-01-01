@@ -1,25 +1,37 @@
-local colorTuple = require("tools/color")
+local Tuple = require("tools/tuple")
 
-local function buildPixel(x, y, color)
-   if color == nil then color = colorTuple(0, 0, 0) end
-   return {x = x, y = y, color = color}
+local canvas = {}
+
+local function pixelIdxFromPos(x, y, width) return (x + y * width) + 1 end
+
+-- Mutates matrix in place
+local function updatePixel(c, x, y, color)
+  if c.pixels[pixelIdxFromPos(x, y, c.width)] ~= nil then
+    c.pixels[pixelIdxFromPos(x, y, c.width)] = color
+  end
+  return c
 end
 
-local function canvas(width, height, color)
-  --[[
-  Multidimensional table to hold pixels
-  Built as a list of rows (x-axis) containing columns (y-axis) of pixels
-  Finding elemnts using x (column#) and y (row#) in matrix
-  ]]--
-  local matrix = {}
-  for i=1, height, 1 do
-    matrix[i] = {} -- row
-    for j=1, width, 1 do
-      matrix[i][j] = buildPixel(i, j, color)
-    end
+local function pixelAt(c, x, y)
+  return c.pixels[pixelIdxFromPos(x, y, c.width)]
+end
+
+canvas.new = function(width, height, initialColor)
+  local c = {}
+  local color = initialColor or Tuple.color(0, 0, 0)
+  local pixels = {}
+  for i = 1, width * height, 1 do
+    table.insert(pixels, i, color)
   end
 
-  return { width = width, height = height, matrix = matrix}
+  c.width = width
+  c.height = height
+  c.pixels = pixels
+
+  function c:pixelAt(x, y) return pixelAt(self, x, y) end
+  function c:updatePixel(x, y, color) return updatePixel(self, x, y, color) end
+
+  return c
 end
 
-return canvas
+return function(width, height, initialColor) return canvas.new(width, height, initialColor) end
