@@ -1,16 +1,29 @@
+--
+--Returns a string of all table values separated by delimiter
+--
+--@param t table # Table to be joined
+--@param delim string # Delimiter
+--@return string join
 local function join(t, delim)
   if delim == nil then delim = "" end
-  local str
+  local str = {}
   for _, v in pairs(t) do
-    if str == nil then
-      str = tostring(v)
+    if #str == 0 then
+      str[1] = tostring(v)
     else
-      str = str..delim..tostring(v)
+      str[#str+1] = delim
+      str[#str+1] = tostring(v)
     end
   end
-  return str
+  return table.concat(str)
 end
 
+--
+--Returns table result of mapping function over valies
+--
+--@param t table # Table to operate over
+--@param fn function # Mapping function accepts values returns any
+--@return table mapped
 local function map(t, fn)
   local result = {}
   for k, v in pairs(t) do
@@ -19,10 +32,25 @@ local function map(t, fn)
   return result
 end
 
+--
+--Returns a table containing key/values that pass the supplied test function
+--
+--@param t table # Table to be filtered
+--@param test function # Accepts key and value, returns eturns boolean
+--@return table filtered
+local function filter(t, test)
+   local resp = {}
+   for k, v in pairs(t) do
+      if test(k, v) then
+         resp[k] = v
+      end
+   end
+   return resp
+end
 
-Table = {
+return {
    join = join,
    map = map,
+   filter = filter,
 }
 
-return Table

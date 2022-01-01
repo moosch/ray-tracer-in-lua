@@ -6,8 +6,5 @@ local function split(s, delim)
   return result
 end
 
-String = {
-   split = split
-}
+return { split = split }
 
-return String
