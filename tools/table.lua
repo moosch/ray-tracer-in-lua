@@ -39,18 +39,35 @@ end
 --@param test function # Accepts key and value, returns eturns boolean
 --@return table filtered
 local function filter(t, test)
-   local resp = {}
-   for k, v in pairs(t) do
-      if test(k, v) then
-         resp[k] = v
-      end
-   end
-   return resp
+  local resp = {}
+  for k, v in pairs(t) do
+    if test(k, v) then
+      resp[k] = v
+    end
+  end
+  return resp
+end
+
+--
+--Flatten a 2 dimensional table
+--
+--@param t table # Table to be flattened
+--@return table flattened
+local function flatten(t)
+  local resp = {}
+  local idx = 1
+  for _,v in t do
+    for _,i in v do
+      resp[idx] = i
+      idx = idx + 1
+    end
+  end
+  return resp
 end
 
 return {
-   join = join,
-   map = map,
-   filter = filter,
+  join = join,
+  map = map,
+  filter = filter,
+  flatten = flatten,
 }
-
