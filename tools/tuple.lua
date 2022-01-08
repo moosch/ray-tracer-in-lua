@@ -16,39 +16,47 @@ end
 local vector = {}
 local vecmt = {}
 
-vector.new = function(x, y, z)
-   local v = {x=x, y=y, z=z, type="vector"}
-   setmetatable(v, vecmt)
-   return v
+vector.new = function(x, y, z, w)
+  local v = {x=x, y=y, z=z, w=w, type="vector"}
+  setmetatable(v, vecmt)
+  return v
 end
 
 local addTwoVectors = function(a, b)
-   return vector.new(a.x + b.x, a.y + b.y, a.z + b.z)
+  local w
+  if a.w ~= nil and b.w ~= nil then w = a.w + b.w end
+  return vector.new(a.x + b.x, a.y + b.y, a.z + b.z, w)
 end
 local addConstantToVector = function(vec, v)
-   return vector.new(vec.x + v, vec.y + v, vec.z + v)
+  local w
+  if vec.w ~= nil then w = vec.w + v end
+  return vector.new(vec.x + v, vec.y + v, vec.z + v, w)
 end
 
 vecmt.__add = function(a, b)
-   -- Add constant to vector
-   if type(b) == "number" then
-      return addConstantToVector(a, b)
-   end
+  -- Add constant to vector
+  if type(b) == "number" then
+    return addConstantToVector(a, b)
+  end
 
-   -- Add two vectors
-   if b.type == "vector" then
-      return addTwoVectors(a, b)
-   end
+  -- Add two vectors
+  if b.type == "vector" then
+    return addTwoVectors(a, b)
+  end
 
-   -- Best guess
-   return vector.new(a.x + b.x, a.y + b.y, a.z + b.z)
+  -- Best guess
+  return vector.new(a.x + b.x, a.y + b.y, a.z + b.z)
 end
 
 local subtractTwoVectors = function(a, b)
-   return vector.new(a.x - b.x, a.y - b.y, a.z - b.z)
+  local w = a.w
+  if w ~= nil and b.w ~= nil then w = w - b.w end
+  return vector.new(a.x - b.x, a.y - b.y, a.z - b.z, w)
 end
 local subtractConstantFromVector = function(vec, v)
-   return vector.new(vec.x - v, vec.y - v, vec.z - v)
+  local w = vec.w
+  if w ~= nil then w = w - v end
+  return vector.new(vec.x - v, vec.y - v, vec.z - v, w)
 end
 
 vecmt.__sub = function(a, b)
@@ -59,24 +67,32 @@ vecmt.__sub = function(a, b)
 end
 
 local multiplyConstantByVector = function(vec, v)
-   return vector.new(vec.x * v, vec.y * v, vec.z * v)
+  local w = vec.w
+  if w ~= nil then w = w * v end
+  return vector.new(vec.x * v, vec.y * v, vec.z * v, w)
 end
 local multiplyTwoVectors = function(a, b)
-   return vector.new(a.x * b.x, a.y * b.y, a.z * b.z)
+  local w = a.w
+  if w ~= nil and b.w ~= nil then w = w * b.w end
+  return vector.new(a.x * b.x, a.y * b.y, a.z * b.z, w)
 end
 
 vecmt.__mul = function(a, b)
-   if type(b) == "number" then
-      return multiplyConstantByVector(a, b)
-   end
-   return multiplyTwoVectors(a, b)
+  if type(b) == "number" then
+    return multiplyConstantByVector(a, b)
+  end
+  return multiplyTwoVectors(a, b)
 end
 
 local divideVectorByConstant = function(vec, v)
-   return vector.new(vec.x / v, vec.y / v, vec.z / v)
+  local w = vec.w
+  if w ~= nil then w = w / v end
+  return vector.new(vec.x / v, vec.y / v, vec.z / v, w)
 end
 local divideTwoVectors = function(a, b)
-   return vector.new(a.x / b.x, a.y / b.y, a.z / b.z)
+  local w = a.w
+  if w ~= nil and b.w ~= nil then w = w / b.w end
+  return vector.new(a.x / b.x, a.y / b.y, a.z / b.z, w)
 end
 vecmt.__div = function(a, b)
    if type(b) == "number" then
@@ -86,20 +102,20 @@ vecmt.__div = function(a, b)
 end
 
 vecmt.__eq = function(a, b)
-   if eq(a.x, b.x)
-    and eq(a.y, b.y)
-    and eq(a.z, b.z) then
+  if eq(a.x, b.x) and eq(a.y, b.y) and eq(a.z, b.z) and eq(a.w, b.w) then
     return true
-   end
-   return false
+  end
+  return false
 end
 
 vecmt.__unm = function(v)
-   return vector.new(-1.0 * v.x, -1.0 * v.y, -1.0 * v.z)
+  local w
+  if v.w ~= nil then w = -1.0 * v.w end
+  return vector.new(-1.0 * v.x, -1.0 * v.y, -1.0 * v.z, w)
 end
 
 vecmt.__tostring = function(v)
-   return "{x: "..v.x..", y: "..v.y..", z: "..v.z.."}"
+  return "{x: "..v.x..", y: "..v.y..", z: "..v.z..", w: "..v.w.."}"
 end
 
 -- local Vector = function(x, y, z) return vector.new(x, y, z) end
@@ -357,4 +373,3 @@ local Tuple = {
 }
 
 return Tuple
-

@@ -40,4 +40,63 @@ function testVariousMatricesSizes()
   lu.assertEquals(m3.at(2, 2), 1)
 end
 
+function testMatrixEqualityWithIdenticalMatrices()
+  local m1 = Matrix({
+      {1, 2, 3, 4},
+      {5, 6, 7, 8},
+      {9, 8, 7, 6},
+      {5, 4, 3, 2},
+  })
+  local m2 = Matrix({
+      {1, 2, 3, 4},
+      {5, 6, 7, 8},
+      {9, 8, 7, 6},
+      {5, 4, 3, 2},
+  })
+
+  lu.assertIsTrue(m1 == m2)
+end
+
+function testMatrixEqualityWithDifferentMatrices()
+  local m1 = Matrix({
+      {1, 2, 3, 4},
+      {5, 6, 7, 8},
+      {9, 8, 7, 6},
+      {5, 4, 3, 2},
+  })
+  local m2 = Matrix({
+      {2, 3, 4, 5},
+      {6, 7, 8, 9},
+      {8, 7, 6, 5},
+      {4, 3, 2, 1},
+  })
+
+  lu.assertIsFalse(m1 == m2)
+end
+
+function testMatrixMultiplication()
+  local m1 = Matrix({
+      {1, 2, 3, 4},
+      {5, 6, 7, 8},
+      {9, 8, 7, 6},
+      {5, 4, 3, 2}
+  })
+  local m2 = Matrix({
+      {-2, 1, 2, 3},
+      {3, 2, 1, -1},
+      {4, 3, 6, 5},
+      {1, 2, 7, 8}
+  })
+  local expected = Matrix({
+    {20, 22, 50, 48},
+    {44, 54, 114, 108},
+    {40, 58, 110, 102},
+    {16, 26, 46, 42}
+  })
+
+  local actual = m1 * m2
+
+  lu.assertIsTrue(actual == expected)
+end
+
 os.exit(lu.LuaUnit.run())
