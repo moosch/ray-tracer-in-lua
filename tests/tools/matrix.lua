@@ -1,9 +1,9 @@
-require("tools/tuple")
 local lu = require("libs/luaunit")
-local Matrix = require("tools/matrix")
+require("tools/tuple")
+require("tools/matrix")
 
 function testConstructingAndInspecting4by4Matrix()
-  local m = Matrix.new({
+  local m = Matrix({
       {1, 2, 3, 4},
       {5.5, 6.5, 7.5, 8.5},
       {9, 10, 11, 12},
@@ -20,7 +20,7 @@ function testConstructingAndInspecting4by4Matrix()
 end
 
 function testVariousMatricesSizes()
-  local m2 = Matrix.new({
+  local m2 = Matrix({
       {-3, 5},
       {1, -2},
   })
@@ -30,7 +30,7 @@ function testVariousMatricesSizes()
   lu.assertEquals(m2.at(1, 0), 1)
   lu.assertEquals(m2.at(1, 1), -2)
 
-  local m3 = Matrix.new({
+  local m3 = Matrix({
       {-3, 5, 0},
       {1, -2, -7},
       {0, 1, 1},
@@ -42,13 +42,13 @@ function testVariousMatricesSizes()
 end
 
 function testMatrixEqualityWithIdenticalMatrices()
-  local m1 = Matrix.new({
+  local m1 = Matrix({
       {1, 2, 3, 4},
       {5, 6, 7, 8},
       {9, 8, 7, 6},
       {5, 4, 3, 2},
   })
-  local m2 = Matrix.new({
+  local m2 = Matrix({
       {1, 2, 3, 4},
       {5, 6, 7, 8},
       {9, 8, 7, 6},
@@ -59,13 +59,13 @@ function testMatrixEqualityWithIdenticalMatrices()
 end
 
 function testMatrixEqualityWithDifferentMatrices()
-  local m1 = Matrix.new({
+  local m1 = Matrix({
       {1, 2, 3, 4},
       {5, 6, 7, 8},
       {9, 8, 7, 6},
       {5, 4, 3, 2},
   })
-  local m2 = Matrix.new({
+  local m2 = Matrix({
       {2, 3, 4, 5},
       {6, 7, 8, 9},
       {8, 7, 6, 5},
@@ -76,19 +76,19 @@ function testMatrixEqualityWithDifferentMatrices()
 end
 
 function testMatrixMultiplication()
-  local m1 = Matrix.new({
+  local m1 = Matrix({
       {1, 2, 3, 4},
       {5, 6, 7, 8},
       {9, 8, 7, 6},
       {5, 4, 3, 2}
   })
-  local m2 = Matrix.new({
+  local m2 = Matrix({
       {-2, 1, 2, 3},
       {3, 2, 1, -1},
       {4, 3, 6, 5},
       {1, 2, 7, 8}
   })
-  local expected = Matrix.new({
+  local expected = Matrix({
     {20, 22, 50, 48},
     {44, 54, 114, 108},
     {40, 58, 110, 102},
@@ -101,7 +101,7 @@ function testMatrixMultiplication()
 end
 
 function testMultiplyMatrixByTuple()
-  local m = Matrix.new({
+  local m = Matrix({
       {1, 2, 3, 4},
       {2, 4, 4, 2},
       {8, 6, 4, 1},
@@ -116,13 +116,13 @@ function testMultiplyMatrixByTuple()
 end
 
 function testMultiplyMatrixByIdentityMatrix()
-  local m = Matrix.new({
+  local m = Matrix({
       {0, 1, 2, 4},
       {1, 2, 4, 8},
       {2, 4, 8, 16},
       {4, 8, 16, 32},
   })
-  local id = Matrix.identity()
+  local id = Identity()
   local actual = m * id
 
   lu.assertIsTrue(actual == m)
@@ -130,9 +130,36 @@ end
 
 function testMultiplyTupleByIdentityMatrix()
   local t = Tuple(1, 2, 3, 4)
-  local actual = Matrix.identity() * t
+  local actual = Identity() * t
 
   lu.assertIsTrue(actual == t)
 end
+
+function testTransposingAMatrix()
+  local m = Matrix({
+      {0, 9, 3, 0},
+      {9, 8, 0, 8},
+      {1, 8, 5, 3},
+      {0, 0, 5, 8},
+  })
+  local expected = Matrix({
+      {0, 9, 1, 0},
+      {9, 8, 8, 0},
+      {3, 0, 5, 5},
+      {0, 8, 3, 8},
+  })
+  local actual = Transpose(m)
+
+  lu.assertIsTrue(actual == expected)
+end
+
+function testTransposingIdentityReturnsIdentity()
+  local id = Identity()
+  local actual = Transpose(id)
+
+  lu.assertIsTrue(actual == id)
+end
+
+
 
 os.exit(lu.LuaUnit.run())
