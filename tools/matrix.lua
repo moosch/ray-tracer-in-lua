@@ -2,6 +2,8 @@
 A Matrix is a table with additional metatable methods.
 --]]
 
+require("tools/tuple")
+
 --
 --Get the value at a given row/column coordinate
 --To access a position, use `myMatrix.at(0, 2)`
@@ -21,7 +23,11 @@ end
 
 local function eq(a, b)
   if #a ~= #b then return false end
-  if a.type ~= b.type then return false end
+  if a.type ~= "matrix" then return false end
+  if b.type ~= "matrix" and b.type ~= "vector" then return false end
+
+  -- If b is matrix
+  -- If b is tuple/vector
 
   for i=1, #a, 1 do
     if equal(rawget(a, i), rawget(b, i)) == false then
@@ -60,6 +66,19 @@ local function mul(a, b)
   return m
 end
 
+local function mulTuple(m, t)
+  local res = {}
+  for r = 1, m.size, 1 do
+    local w = 1
+    if t.w ~= nil then w = t.w end
+    res[r] = m.at(r-1, 0) * t.x +
+        m.at(r-1, 1) * t.y +
+        m.at(r-1, 2) * t.z +
+        m.at(r-1, 3) * w
+  end
+  return Tuple(res[1], res[2], res[3], res[4])
+end
+
 --
 --Create a new matrix. Basically just runs checks on a multidimensional table.
 --A matrix must have equal number of columns and rows, and not be empty.
@@ -67,8 +86,18 @@ end
 --@param t table # The matrix candidate
 --@return table matrix
 local function new(t)
-  assert(type(t), "table", "matrix must be a table")
-  assert(#t == #t[1], "matrix must be a square. As in 2x2, 3x3, 4x4 etc.")
+  -- assert(type(t), "table", "matrix must be a table")
+  -- assert(#t == #t[1], "matrix must be a square. As in 2x2, 3x3, 4x4 etc.")
+
+  -- Default as identity matrix
+  if t == nil then
+    t = {
+      {1, 0, 0, 0},
+      {0, 1, 0, 0},
+      {0, 0, 1, 0},
+      {0, 0, 0, 1},
+    }
+  end
 
   local mt = {}
   mt.__index = {
@@ -77,10 +106,42 @@ local function new(t)
     size = #t,
   }
   mt.__eq = eq
-  mt.__mul = function(a, b) return new(mul(a, b)) end
+  mt.__mul = function(a, b)
+    if b.type == "matrix" then
+      return new(mul(a, b))
+    end
+    if b.type == "tuple" then
+      return mulTuple(a, b)
+    end
+    return a
+  end
 
   setmetatable(t, mt)
   return t
 end
 
-return new
+--
+--Create a diagonal Matrix.
+--All non-diagonal 0,0 to 3,3 elements are 0
+--
+--@param n number # The diagonal value
+--@return table matrix
+local function diagonal(n)
+  return new({
+      {n, 0, 0, 0},
+      {0, n, 0, 0},
+      {0, 0, n, 0},
+      {0, 0, 0, n},
+  })
+end
+
+--
+--Create an Identity Matrix
+--
+--@return table matrix
+local function identity() return diagonal(1) end
+
+return {
+  new = new,
+  identity = identity,
+}

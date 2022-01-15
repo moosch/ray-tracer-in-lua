@@ -1,9 +1,9 @@
 require("math")
-local Tuple = require("tools/tuple")
+require("tools/tuple")
 local Canvas = require("tools/canvas")
 local buildPPM = require("tools/ppm")
 
-local white = Tuple.color(1, 1, 1)
+local white = Color(1, 1, 1)
 
 local function projectile(position, velocity)
   return {
@@ -33,9 +33,9 @@ local function tick(canvas, env, proj)
   return canvas, projectile(position, velocity)
 end
 
-local p = projectile(Tuple.point(0, 1, 0), Tuple.normalize(Tuple.vector(1, 1.8, 0)) * 11.25)
-local gravity = Tuple.vector(0, -0.1, 0)
-local wind = Tuple.vector(-0.01, 0, 0)
+local p = projectile(Point(0, 1, 0), Normalize(Vector(1, 1.8, 0)) * 11.25)
+local gravity = Vector(0, -0.1, 0)
+local wind = Vector(-0.01, 0, 0)
 local e = environment(gravity, wind)
 local c = Canvas(900, 500)
 
@@ -50,4 +50,3 @@ print("saving ppm file...")
 file:write(ppm)
 file:close()
 print("done")
-

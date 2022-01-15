@@ -1,4 +1,4 @@
-local Tuple = require("tools/tuple")
+require("tools/tuple")
 
 local canvas = {}
 
@@ -18,7 +18,7 @@ end
 
 canvas.new = function(width, height, initialColor)
   local c = {}
-  local color = initialColor or Tuple.color(0, 0, 0)
+  local color = initialColor or Color(0, 0, 0)
   local pixels = {}
   for i = 1, width * height, 1 do
     table.insert(pixels, i, color)
