@@ -160,6 +160,107 @@ function testTransposingIdentityReturnsIdentity()
   lu.assertIsTrue(actual == id)
 end
 
+-- Determinants
+function testCalculatingDeterminantOf2DMatrix()
+  local m = Matrix({
+      {1, 5},
+      {-3, 2},
+  })
+  local expected = 17
+  local actual = Determinant(m)
+
+  lu.assertIsTrue(actual == expected)
+end
+
+-- Submatrices
+function testSubmatrixOf3DMatrixIs2DMatrix()
+  local m = Matrix({
+      {1, 5, 0},
+      {-3, 2, 7},
+      {0, 6, -3},
+  })
+  local expected = Matrix({
+      {-3, 2},
+      {0, 6},
+  })
+  local actual = Submatrix(m, 0, 2)
+
+  lu.assertIsTrue(actual == expected)
+end
+
+function testSubmatrixOf4DMatrixIs3DMatrix()
+  local m = Matrix({
+      {-6, 1, 1, 6},
+      {-8, 5, 8, 6},
+      {-1, 0, 8, 2},
+      {-7, 1, -1, 1},
+  })
+  local expected = Matrix({
+      {-6, 1, 6},
+      {-8, 8, 6},
+      {-7, -1, 1},
+  })
+  local actual = Submatrix(m, 2, 1)
+
+  lu.assertIsTrue(actual == expected)
+end
+
+-- Minors
+
+function testCalcAMinorOf3DMatrix()
+  local m = Matrix({
+      {3, 5, 0},
+      {2, -1, -7},
+      {6, -1, 5},
+  })
+  local submatrix = Submatrix(m, 1, 0)
+  local determinant = Determinant(submatrix)
+  local actual = Minor(m, 1, 0)
+
+  lu.assertIsTrue(determinant == 25)
+  lu.assertIsTrue(actual == 25)
+end
+
+-- Cofactors
+
+function testCalcCofactorOf3DMatrix()
+  local m = Matrix({
+      {3, 5, 0},
+      {2, -1, -7},
+      {6, -1, 5},
+  })
+
+  lu.assertEquals(Minor(m, 0, 0), -12)
+  lu.assertEquals(Cofactor(m, 0, 0), -12)
+  lu.assertEquals(Minor(m, 1, 0), 25)
+  lu.assertEquals(Cofactor(m, 1, 0), -25)
+end
+
+function testCalcDeterminatnOfLargerMatrices()
+  local m1 = Matrix({
+      {1, 2, 6},
+      {-5, 8, -4},
+      {2, 6, 4},
+  })
+  local m2 = Matrix({
+      {-2, -8, 3, 5},
+      {-3, 1, 7, 3},
+      {1, 2, -9, 6},
+      {-6, 7, 7, -9},
+  })
+
+  lu.assertEquals(Cofactor(m1, 0, 0), 56)
+  lu.assertEquals(Cofactor(m1, 0, 1), 12)
+  lu.assertEquals(Cofactor(m1, 0, 2), -46)
+  lu.assertEquals(Determinant(m1), -196)
+
+  lu.assertEquals(Cofactor(m2, 0, 0), 690)
+  lu.assertEquals(Cofactor(m2, 0, 1), 447)
+  lu.assertEquals(Cofactor(m2, 0, 2), 210)
+  lu.assertEquals(Cofactor(m2, 0, 3), 51)
+  lu.assertEquals(Determinant(m2), -4071)
+end
+
 
 
 os.exit(lu.LuaUnit.run())
