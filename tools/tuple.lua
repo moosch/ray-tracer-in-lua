@@ -1,17 +1,9 @@
+require("tools/fuzzy_eq")
+
 local tuple = {}
 local vector = {}
 local point = {}
 local color = {}
-
-local epsilon = 0.00001
-
-local function fuzzyEq(a, b)
-  if math.abs(a - b) < epsilon then
-    return true
-  else
-    return false
-  end
-end
 
 local function eq(a, b)
   if a == nil and b == nil then return true end

@@ -2,6 +2,7 @@
 A Matrix is a table with additional metatable methods.
 --]]
 
+require("tools/fuzzy_eq")
 require("tools/tuple")
 
 local matrix = {}
@@ -108,6 +109,24 @@ matrix.new = function(t)
   return t
 end
 
+matrix.fuzzy_eq = function(m1, m2)
+  if m1.type ~= "matrix" then return false end
+  if m2.type ~= "matrix" and m2.type ~= "vector" then
+    return false
+  end
+  if m1.size ~= m2.size then return false end
+
+  local size = m1.size
+  for row=1, size, 1 do
+    for col=1, size, 1 do
+      if fuzzyEq(m1.at(row-1, col-1), m2.at(row-1, col-1)) == false then
+        return false
+      end
+    end
+  end
+  return true
+end
+
 matrix.diagonal = function(n, size)
   if size == nil then size = 4 end
   local m = {}
@@ -186,6 +205,29 @@ matrix.cofactor = function(m, r, c)
   return minorAt * -1
 end
 
+matrix.inverse = function(m)
+  local determinant = matrix.determinant(m)
+
+  if determinant == 0 then
+    error("matrix is not invertible")
+  end
+
+  local mat = {}
+  local size = m.size
+
+  for row=1, size, 1 do
+    for col=1, size, 1 do
+      if mat[col] == nil then mat[col] = {} end
+      if mat[col][row] == nil then mat[col][row] = {} end
+      local cofactor = matrix.cofactor(m, row-1, col-1)
+      -- Store as transposed
+      mat[col][row] = cofactor / determinant
+    end
+  end
+
+  return matrix.new(mat)
+end
+
 
 --
 --Create a new matrix. Basically just runs checks on a multidimensional table.
@@ -253,3 +295,18 @@ Minor = function(m, r, c) return matrix.minor(m, r, c) end
 --@param c number # Column number
 --@return table matrix
 Cofactor = function(m, r, c) return matrix.cofactor(m, r, c) end
+
+--
+--Inverse of Matrix
+--
+--@param m table # Matrix
+--@return table matrix
+Inverse = function(m) return matrix.inverse(m) end
+
+--
+--FuzzyEq Matrices
+--
+--@param m1 table # Matrix
+--@param m2 table # Matrix
+--@return boolean equals
+FuzzyEq = function(m1, m2) return matrix.fuzzy_eq(m1, m2) end
