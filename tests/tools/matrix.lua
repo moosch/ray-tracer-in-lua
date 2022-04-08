@@ -310,4 +310,73 @@ function testCalculatingTheInverseOfAMatrix()
   lu.assertIsTrue(FuzzyEq(b, expectedB))
 end
 
+function testCalculatingTheInverseOfAnotherMatrix()
+  local a = Matrix({
+      {8, -5, 9, 2},
+      {7, 5, 6, 1},
+      {-6, 0, 9, 6},
+      {-3, 0, -9, -4},
+  })
+  local b = Inverse(a)
+  local expectedB = Matrix({
+      {-0.15385, -0.15385, -0.28205, -0.53846},
+      {-0.07692, 0.12308, 0.02564, 0.03077},
+      {0.35897, 0.35897, 0.43590, 0.92308},
+      {-0.69231, -0.69231, -0.76923, -1.92308},
+  })
+
+  lu.assertIsTrue(FuzzyEq(b, expectedB))
+end
+
+function testCalculatingTheInverseOfAThirdMatrix()
+  local a = Matrix({
+      {9, 3, 0, 9},
+      {-5, -2, -6, -3},
+      {-4, 9, 6, 4},
+      {-7, 6, 6, 2},
+  })
+  local b = Inverse(a)
+  local expectedB = Matrix({
+      {-0.04074, -0.07778, 0.14444, -0.22222},
+      {-0.07778, 0.03333, 0.36667, -0.33333},
+      {-0.02901, -0.14630, -0.10926, 0.12963},
+      {0.17778, 0.06667, -0.26667, 0.33333},
+  })
+
+  lu.assertIsTrue(FuzzyEq(b, expectedB))
+end
+
+function testMultiplyAProductByItsInverse()
+  local a = Matrix({
+      {3, -9, 7, 3},
+      {3, -8,  2, -9},
+      {-4, 4, 4, 1},
+      {-6, 5, -1, 1},
+  })
+  local b = Matrix({
+      {8, 2, 2, 2},
+      {3, -1, 7, 0},
+      {7, 0, 5, 4},
+      {6, -2, 0, 5},
+  })
+  local c = a * b
+
+  local expected = c * Inverse(b)
+
+  lu.assertIsTrue(FuzzyEq(expected, a))
+end
+
+function testInvertingIdentityMatrix()
+  local id = Identity()
+  local actual = Inverse(id)
+  local expected = Matrix({
+      {1.0, 0.0, 0.0, 0.0},
+      {0.0, 1.0, 0.0, 0.0},
+      {0.0, 0.0, 1.0, 0.0},
+      {0.0, 0.0, 0.0, 1.0},
+  })
+
+  lu.assertEquals(0,0)
+end
+
 os.exit(lu.LuaUnit.run())

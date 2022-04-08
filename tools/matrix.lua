@@ -84,6 +84,7 @@ local function mulTuple(m, t)
 end
 
 matrix.new = function(t)
+  local t_cache = t
   if t == nil then
     t = matrix.idendity()
   end
@@ -103,6 +104,13 @@ matrix.new = function(t)
       return mulTuple(a, b)
     end
     return a
+  end
+  mt.__tostring = function(t)
+    local printTable = {}
+    for row=1, #t, 1 do
+      printTable[row] = table.concat(t[row], ", ")..",\n"
+    end
+    return "Matrix{\n"..table.concat(printTable).."}"
   end
 
   setmetatable(t, mt)
