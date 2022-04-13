@@ -1,12 +1,12 @@
+require("tools/tuple")
 local Canvas = require("tools/canvas")
 local buildPPM = require("tools/ppm")
 local String = require("tools/string")
-local Tuple = require("tools/tuple")
 local lu = require("libs/luaunit")
 
 function testCreateCanvas()
   local c = Canvas(10, 20)
-  local black = Tuple.color(0, 0, 0)
+  local black = Color(0, 0, 0)
 
   lu.assertEquals(c.width, 10)
   lu.assertEquals(c.height, 20)
@@ -17,7 +17,7 @@ end
 
 function testWritingPixelToCanvas()
   local c = Canvas(10, 20)
-  local red = Tuple.color(1, 0, 0)
+  local red = Color(1, 0, 0)
   c:updatePixel(0, 0, red)
   c:updatePixel(2, 3, red)
 
@@ -27,9 +27,9 @@ end
 
 function testConstructPPMData()
    local c = Canvas(5, 3)
-   local c1 = Tuple.color(1.5, 0, 0)
-   local c2 = Tuple.color(0, 0.5, 0)
-   local c3 = Tuple.color(-0.5, 0, 1)
+   local c1 = Color(1.5, 0, 0)
+   local c2 = Color(0, 0.5, 0)
+   local c3 = Color(-0.5, 0, 1)
    c:updatePixel(0, 0, c1)
    c:updatePixel(2, 1, c2)
    c:updatePixel(4, 2, c3)
@@ -45,7 +45,7 @@ function testConstructPPMData()
 end
 
 function testSplittingLongPPMLines()
-   local c = Canvas(10, 2, Tuple.color(1, 0.8, 0.6))
+   local c = Canvas(10, 2, Color(1, 0.8, 0.6))
    local ppm = buildPPM(c)
    local ppmList = String.split(ppm, "\n")
 

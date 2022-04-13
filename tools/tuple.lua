@@ -1,226 +1,272 @@
-local epsilon = 0.00001
+require("tools/fuzzy_eq")
+
+local tuple = {}
+local vector = {}
+local point = {}
+local color = {}
 
 local function eq(a, b)
   if a == nil and b == nil then return true end
-  if math.abs(a - b) < epsilon then
-    return true
-  else
+  -- if a.type ~= b.type then return false end
+  if fuzzyEq(a.x, b.x) == false
+    or fuzzyEq(a.y, b.y) == false
+    or fuzzyEq(a.z, b.z) == false
+    or fuzzyEq(a.w, b.w) == false then
     return false
   end
+
+  return true
+end
+
+--
+--Adds two tuples
+--
+--@param a table # Tuple | Vector | Point
+--@param b table # Tuple | Vector | Point
+--@return table tuple
+local function addTuples(a, b)
+  if a.type == "point" and b.type == "point" then
+    -- Doesn't make sense to add point to point
+    assert(false, "Should not add two Points")
+  end
+  local w = a.w + b.w
+  if w == 0 then
+    return vector.new(a.x + b.x, a.y + b.y, a.z + b.z)
+  end
+  if w == 1 then
+    return point.new(a.x + b.x, a.y + b.y, a.z + b.z)
+  end
+  return tuple.new(a.x + b.x, a.y + b.y, a.z + b.z, w)
+end
+
+--
+--Adds number to tuple
+--
+--@param t table # Tuple | Vector | Point
+--@param n number
+--@return table tuple
+local function addToTuple(t, n)
+  if t.type == "vector" then
+    return vector.new(t.x + n, t.y + n, t.z + n)
+  end
+  if t.type == "point" then
+    return point.new(t.x + n, t.y + n, t.z + n)
+  end
+  return tuple.new(t.x + n, t.y + n, t.z + n, t.w + n)
+end
+
+--
+--Subtract Tuple from Tuple
+--
+--@param a table # Tuple | Vector | Point
+--@param b table # Tuple | Vector | Point
+--@return table tuple
+local function subtractTuples(a, b)
+  local w = a.w - b.w
+  if w == 0 then
+    return vector.new(a.x - b.x, a.y - b.y, a.z - b.z)
+  end
+  if w == 1 then
+    return point.new(a.x - b.x, a.y - b.y, a.z - b.z)
+  end
+  return tuple.new(a.x - b.x, a.y - b.y, a.z - b.z, w)
+end
+
+--
+--Subtract number from tuple
+--
+--@param t table # Tuple | Vector | Point
+--@param n number
+--@return table tuple
+local function subtractFromTuple(t, n)
+  if t.type == "vector" then
+    return vector.new(t.x - n, t.y - n, t.z - n)
+  end
+  if t.type == "point" then
+    return point.new(t.x - n, t.y - n, t.z - n)
+  end
+  return tuple.new(t.x - n, t.y - n, t.z - n, t.w - n)
+end
+
+--
+--Negate a tuple
+--
+--@param t table # Tuple | Vector | Point
+--@return table tuple
+local function negateTuple(t)
+  if t.type == "vector" then
+    return vector.new(t.x * -1.0, t.y * -1.0, t.z * -1.0)
+  end
+  if t.type == "point" then
+    return point.new(t.x * -1.0, t.y * -1.0, t.z * -1.0)
+  end
+  return tuple.new(t.x * -1.0, t.y * -1.0, t.z * -1.0, t.w * -1.0)
+end
+
+--
+--Multiply Tuple by Tuple
+--
+--@param a table # Tuple | Vector | Point
+--@param b table # Tuple | Vector | Point
+--@return table tuple
+local function multiplyTuples(a, b)
+  local w = a.w * b.w
+  if w == 0 then
+    return vector.new(a.x * b.x, a.y * b.y, a.z * b.z)
+  end
+  if w == 1 then
+    return point.new(a.x * b.x, a.y * b.y, a.z * b.z)
+  end
+  return tuple.new(a.x * b.x, a.y * b.y, a.z * b.z, w)
+end
+
+--
+--Multiply tuple by number
+--
+--@param t table # Tuple | Vector | Point
+--@param n number
+--@return table tuple
+local function multiplyTupleBy(t, n)
+  local w = t.w * n
+   if w == 0 then
+    return vector.new(t.x * n, t.y * n, t.z * n)
+  end
+  if w == 1 then
+    return point.new(t.x * n, t.y * n, t.z * n)
+  end
+  return tuple.new(t.x * n, t.y * n, t.z * n, w)
+end
+
+--
+--Divide Tuple by Tuple
+--
+--@param a table # Tuple | Vector | Point
+--@param b table # Tuple | Vector | Point
+--@return table tuple
+local function divideTuples(a, b)
+  -- Avoid divide by zero
+  local bw = b.w
+  if bw == 0 then bw = 1 end
+  local w = a.w / bw
+  if w == 0 then
+    return vector.new(a.x / b.x, a.y / b.y, a.z / b.z)
+  end
+  if w == 1 then
+    return point.new(a.x / b.x, a.y / b.y, a.z / b.z)
+  end
+  return tuple.new(a.x / b.x, a.y / b.y, a.z / b.z, w)
+end
+
+--
+--Divide tuple by number
+--
+--@param t table # Tuple | Vector | Point
+--@param n number
+--@return table tuple
+local function divideTupleBy(t, n)
+  assert(n > 0, "Cannot divide by zero")
+  local w = t.w / n
+   if w == 0 then
+    return vector.new(t.x / n, t.y / n, t.z / n)
+  end
+  if w == 1 then
+    return point.new(t.x / n, t.y / n, t.z / n)
+  end
+  return tuple.new(t.x / n, t.y / n, t.z / n, w)
 end
 
 
 --[[
-  3D Vector
+  Build Metatable for Tuples
 --]]
-local vector = {}
-local vecmt = {}
+local function tupleMetaTable(tupleType)
+  local mt = {}
+  mt.__index = { type = tupleType }
+  mt.__eq = eq
+  mt.__add = function(a, b)
+    if type(b) == "number" then
+      return addToTuple(a, b)
+    end
+    return addTuples(a, b)
+  end
+  mt.__sub = function(a, b)
+    if type(b) == "number" then
+      return subtractFromTuple(a, b)
+    end
+    return subtractTuples(a, b)
+  end
+  mt.__mul = function(a, b)
+    if type(b) == "number" then
+      return multiplyTupleBy(a, b)
+    end
+    return multiplyTuples(a, b)
+  end
+  mt.__div = function(a, b)
+    if type(b) == "number" then
+      return divideTupleBy(a, b)
+    end
+    return divideTuples(a, b)
+  end
+  mt.__unm = function(t)
+    return negateTuple(t)
+  end
+  mt.__tostring = function(t)
+    return tupleType.."{x: "..t.x..", y: "..t.y..", z: "..t.z..", w: "..t.w.."}"
+  end
+  return mt
+end
 
+--[[
+  Creating Tuples
+--]]
 vector.new = function(x, y, z)
-   local v = {x=x, y=y, z=z, type="vector"}
-   setmetatable(v, vecmt)
-   return v
+  local v = {x=x, y=y, z=z, w=0}
+  local mt = tupleMetaTable("vector")
+  setmetatable(v, mt)
+  return v
 end
-
-local addTwoVectors = function(a, b)
-   return vector.new(a.x + b.x, a.y + b.y, a.z + b.z)
-end
-local addConstantToVector = function(vec, v)
-   return vector.new(vec.x + v, vec.y + v, vec.z + v)
-end
-
-vecmt.__add = function(a, b)
-   -- Add constant to vector
-   if type(b) == "number" then
-      return addConstantToVector(a, b)
-   end
-
-   -- Add two vectors
-   if b.type == "vector" then
-      return addTwoVectors(a, b)
-   end
-
-   -- Best guess
-   return vector.new(a.x + b.x, a.y + b.y, a.z + b.z)
-end
-
-local subtractTwoVectors = function(a, b)
-   return vector.new(a.x - b.x, a.y - b.y, a.z - b.z)
-end
-local subtractConstantFromVector = function(vec, v)
-   return vector.new(vec.x - v, vec.y - v, vec.z - v)
-end
-
-vecmt.__sub = function(a, b)
-   if type(b) == "number" then
-      return subtractConstantFromVector(a, b)
-   end
-   return subtractTwoVectors(a, b)
-end
-
-local multiplyConstantByVector = function(vec, v)
-   return vector.new(vec.x * v, vec.y * v, vec.z * v)
-end
-local multiplyTwoVectors = function(a, b)
-   return vector.new(a.x * b.x, a.y * b.y, a.z * b.z)
-end
-
-vecmt.__mul = function(a, b)
-   if type(b) == "number" then
-      return multiplyConstantByVector(a, b)
-   end
-   return multiplyTwoVectors(a, b)
-end
-
-local divideVectorByConstant = function(vec, v)
-   return vector.new(vec.x / v, vec.y / v, vec.z / v)
-end
-local divideTwoVectors = function(a, b)
-   return vector.new(a.x / b.x, a.y / b.y, a.z / b.z)
-end
-vecmt.__div = function(a, b)
-   if type(b) == "number" then
-      return divideVectorByConstant(a, b)
-   end
-   return divideTwoVectors(a, b)
-end
-
-vecmt.__eq = function(a, b)
-   if eq(a.x, b.x)
-    and eq(a.y, b.y)
-    and eq(a.z, b.z) then
-    return true
-   end
-   return false
-end
-
-vecmt.__unm = function(v)
-   return vector.new(-1.0 * v.x, -1.0 * v.y, -1.0 * v.z)
-end
-
-vecmt.__tostring = function(v)
-   return "{x: "..v.x..", y: "..v.y..", z: "..v.z.."}"
-end
-
--- local Vector = function(x, y, z) return vector.new(x, y, z) end
-
---[[
-  3D Point in space
---]]
-
-local point = {}
-local pointmt = {}
 
 point.new = function(x, y, z)
-  local p = {x=x, y=y, z=z, type="point"}
-  setmetatable(p, pointmt)
+  local p = {x=x, y=y, z=z, w=1}
+  local mt = tupleMetaTable("point")
+  setmetatable(p, mt)
   return p
 end
 
-local addTwoPoints = function(a, b)
-  return point.new(a.x + b.x, a.y + b.y, a.z + b.z)
-end
-local addConstantToPoint = function(p, v)
-  return point.new(p.x + v, p.y + v, p.z + v)
-end
-local addPointToVector = function(p, v)
-  return vector.new(p.x + v.x, p.y + v.y, p.z + v.z)
+tuple.new = function(x, y, z, w)
+  local t = {x=x, y=y, z=z, w=w}
+  local mt = tupleMetaTable("tuple")
+  setmetatable(t, mt)
+  return t
 end
 
-pointmt.__add = function(a, b)
-  -- Add constant to point
-  if type(b) == "number" then
-     return addConstantToPoint(a, b)
-  end
+local sumVector = function(v) return v.x + v.y + v.z end
 
-  -- Add two points
-  if b.type == "point" then
-     return addTwoPoints(a, b)
-  end
-  -- Add point to vector
-  if b.type == "vector" then
-     return addPointToVector(a, b)
-  end
+local dotProduct = function(v1, v2) return sumVector(v1 * v2) end
 
-  -- Best guess
-  return point.new(a.x + b.x, a.y + b.y, a.z + b.z)
+local crossProduct = function(v1, v2)
+  return vector.new(
+    v1.y * v2.z - v1.z * v2.y,
+    v1.z * v2.x - v1.x * v2.z,
+    v1.x * v2.y - v1.y * v2.x
+  )
 end
 
--- Returns a vector
-local subtractTwoPoints = function(a, b)
-  return vector.new(a.x - b.x, a.y - b.y, a.z - b.z)
-end
-local subtractConstantFromPoint = function(p, v)
-  return point.new(p.x - v, p.y - v, p.z - v)
-end
-local subtractVectorFromPoint = function(p, v)
-  return vector.new(p.x - v.x, p.y - v.y, p.z - v.z)
-end
+-- Length of vector (hypontenuse)
+local magnitude = function(v) return math.sqrt(dotProduct(v, v)) end
 
-pointmt.__sub = function(a, b)
-  if type(b) == "number" then
-     return subtractConstantFromPoint(a, b)
-  end
-  if type(b) == "vector" then
-     return subtractVectorFromPoint(a, b)
-  end
-  return subtractTwoPoints(a, b)
+local normalize = function(v)
+  local m = magnitude(v)
+  assert(m > 0, "Cannot divide by zero magnitude")
+  return v / m
 end
-
-local multiplyConstantByPoint = function(p, v)
-  return point.new(p.x * v, p.y * v, p.z * v)
-end
-local multiplyTwoPoints = function(a, b)
-  return point.new(a.x * b.x, a.y * b.y, a.z * b.z)
-end
-
-pointmt.__mul = function(a, b)
-  if type(b) == "number" then
-     return multiplyConstantByPoint(a, b)
-  end
-  return multiplyTwoPoints(a, b)
-end
-
-local dividePointByConstant = function(p, v)
-  return point.new(p.x / v, p.y / v, p.z / v)
-end
-local divideTwoPoints = function(a, b)
-  return point.new(a.x / b.x, a.y / b.y, a.z / b.z)
-end
-pointmt.__div = function(a, b)
-  if type(b) == "number" then
-     return dividePointByConstant(a, b)
-  end
-  return divideTwoPoints(a, b)
-end
-
-pointmt.__eq = function(a, b)
-  if eq(a.x, b.x)
-   and eq(a.y, b.y)
-   and eq(a.z, b.z) then
-   return true
-  end
-  return false
-end
-
-pointmt.__unm = function(p)
-  return point.new(-1.0 * p.x, -1.0 * p.y, -1.0 * p.z)
-end
-
-pointmt.__tostring = function(p)
-  return "{x: "..p.x..", y: "..p.y..", z: "..p.z.."}"
-end
-
--- Point = function(x, y, z) return point.new(x, y, z) end
-
 
 --[[
   Color
 --]]
-local color = {}
 local colmt = {}
 
-function RgbFloatToValue(value, maxValue)
+local function rgbFloatToValue(value, maxValue)
   if value < 0 then return 0 end
   if value > maxValue then return maxValue end
   value = math.ceil(value * maxValue)
@@ -229,7 +275,7 @@ function RgbFloatToValue(value, maxValue)
 end
 
 
-function Clamp(color, min, max)
+local function clamp(color, min, max)
   local function doClamp(c)
     local v = c * max
     if v > max then v = max end
@@ -243,43 +289,19 @@ function Clamp(color, min, max)
   )
 end
 
-function RgbStringList(c)
+local function rgbStringList(c)
   return {
-    tostring(RgbFloatToValue(c.r, 255)),
-    tostring(RgbFloatToValue(c.g, 255)),
-    tostring(RgbFloatToValue(c.b, 255))
+    tostring(rgbFloatToValue(c.r, 255)),
+    tostring(rgbFloatToValue(c.g, 255)),
+    tostring(rgbFloatToValue(c.b, 255))
   }
-end
-
-color.new = function(r, g, b)
-   local c = {r=r, g=g, b=b, type="color"}
-   setmetatable(c, colmt)
-
-  function c:rgbStringList() return RgbStringList(self) end
-  function c:clamp(min, max) return Clamp(self, min, max) end
-   return c
 end
 
 local addTwoColors = function(a, b)
   return color.new(a.r + b.r, a.g + b.g, a.b + b.b)
 end
-local addConstantToColor = function(col, v)
-  return color.new(col.r + v, col.g + v, col.b + v)
-end
-
-colmt.__add = function(a, b)
-  -- Add constant to color
-  if type(b) == "number" then
-     return addConstantToColor(a, b)
-  end
-
-  -- Add two colors
-  if b.type == "color" then
-     return addTwoColors(a, b)
-  end
-
-  -- Best guess
-  return color.new(a.r + b.r, a.g + b.g, a.b + b.b)
+local addConstantToColor = function(c, v)
+  return color.new(c.r + v, c.g + v, c.b + v)
 end
 
 local subtractTwoColors = function(a, b)
@@ -289,13 +311,6 @@ local subtractConstantFromColor = function(c, v)
   return color.new(c.r - v, c.g - v, c.b - v)
 end
 
-colmt.__sub = function(a, b)
-  if type(b) == "number" then
-     return subtractConstantFromColor(a, b)
-  end
-  return subtractTwoColors(a, b)
-end
-
 local multiplyConstantByColor = function(c, v)
   return color.new(c.r * v, c.g * v, c.b * v)
 end
@@ -303,58 +318,137 @@ local multiplyTwoColors = function(a, b)
   return color.new(a.r * b.r, a.g * b.g, a.b * b.b)
 end
 
-colmt.__mul = function(a, b)
-  if type(b) == "number" then
-     return multiplyConstantByColor(a, b)
+local function colorMetatable()
+  local mt = {}
+  mt.__index = { type = "color" }
+  mt.__add = function(a, b)
+    -- Add constant to color
+    if type(b) == "number" then
+      return addConstantToColor(a, b)
+    end
+
+    -- Add two colors
+    if b.type == "color" then
+      return addTwoColors(a, b)
+    end
+
+    -- Best guess
+    return color.new(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a)
   end
-  return multiplyTwoColors(a, b)
-end
-
-colmt.__eq = function(a, b)
-  if eq(a.r, b.r)
-   and eq(a.g, b.g)
-   and eq(a.b, b.b) then
-   return true
+  mt.__sub = function(a, b)
+    if type(b) == "number" then
+      return subtractConstantFromColor(a, b)
+    end
+    return subtractTwoColors(a, b)
   end
-  return false
+  mt.__mul = function(a, b)
+    if type(b) == "number" then
+      return multiplyConstantByColor(a, b)
+    end
+    return multiplyTwoColors(a, b)
+  end
+
+  mt.__eq = function(a, b)
+    if fuzzyEq(a.r, b.r)
+      and fuzzyEq(a.g, b.g)
+      and fuzzyEq(a.b, b.b)
+      and fuzzyEq(a.a, b.a) then
+      return true
+    end
+    return false
+  end
+
+  mt.__tostring = function(c)
+    return "color{r: "..c.r..", g: "..c.g..", b: "..c.b..", a: "..c.a.."}"
+  end
+
+  return mt
 end
 
-colmt.__tostring = function(c)
-  return "{r: "..c.r..", g: "..c.g..", b: "..c.b.."}"
+color.new = function(r, g, b, a)
+  local alpha = a or 1
+  if alpha > 1 then
+    alpha = 1
+  end
+  if alpha < 0 then
+    alpha = 0
+  end
+
+  local c = {r=r, g=g, b=b, a=alpha}
+  local mt = colorMetatable()
+  setmetatable(c, mt)
+
+  function c:rgbStringList() return rgbStringList(self) end
+  function c:clamp(min, max) return clamp(self, min, max) end
+
+  return c
 end
 
--- Color = function(r, g, b) return color.new(r, g, b) end
 
+--
+--Create new Tuple
+--
+--@param x number
+--@param y number
+--@param z number
+--@param w number
+--@return table tuple
+Tuple = function(x, y, z, w) return tuple.new(x, y, z, w) end
+--
+--Create new Vector
+--
+--@param x number
+--@param y number
+--@param z number
+--@return table vector
+Vector = function(x, y, z) return vector.new(x, y, z) end
+--
+--Create new Point
+--
+--@param x number
+--@param y number
+--@param z number
+--@return table point
+Point = function(x, y, z) return point.new(x, y, z) end
+--
+--Create new Color
+--
+--@param r number
+--@param g number
+--@param b number
+--@param a number
+--@return table color
+Color = function(r, g, b, a) return color.new(r, g, b, a) end
 
---[[
-  Vector & Point operations
---]]
-
-local sumVector = function(v) return v.x + v.y + v.z end
-
-local dotProduct = function(v1, v2) return sumVector(v1 * v2) end
-
-local crossProduct = function(v1, v2)
-  return vector.new(
-    v1.y * v2.z - v1.z * v2.y,
-    v1.z * v2.x - v1.x * v2.z,
-    v1.x * v2.y - v1.y * v2.x)
-end
-
-local magnitude = function(v) return math.sqrt(dotProduct(v, v)) end
-
-local normalize = function(v) return v / magnitude(v) end
-
-local Tuple = {
-  vector = function(x, y, z) return vector.new(x, y, z) end,
-  point = function(x, y, z) return point.new(x, y, z) end,
-  color = function(r, g, b) return color.new(r, g, b) end,
-  magnitude = magnitude,
-  normalize = normalize,
-  dot = dotProduct,
-  cross = crossProduct,
-  sumVector = sumVector
-}
-
-return Tuple
-
+--
+--Normalize a vector
+--
+--@param v table # Vector to be normalized
+--@return table vector
+Normalize = function(v) return normalize(v) end
+--
+--Get magnitude (length) of a vector
+--
+--@param v table # Vector
+--@return number magnitude
+Magnitude = function(v) return magnitude(v) end
+--
+--Dot Product of two vectors
+--
+--@param a table # Vector
+--@param b table # Vector
+--@return number dotproduct
+Dot = function(a, b) return dotProduct(a, b) end
+--
+--Cross Product of two vectors
+--
+--@param a table # Vector
+--@param b table # Vector
+--@return number crossproduct
+Cross = function(a, b) return crossProduct(a, b) end
+--
+--Sum of vector values
+--
+--@param v table # Vector
+--@return number sum
+Sum = function(v) return sumVector(v) end
