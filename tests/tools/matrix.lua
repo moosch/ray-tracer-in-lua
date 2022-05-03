@@ -150,14 +150,14 @@ function testTransposingAMatrix()
   })
   local actual = Transpose(m)
 
-  lu.assertIsTrue(actual == expected)
+  lu.assertEquals(actual, expected)
 end
 
 function testTransposingIdentityReturnsIdentity()
   local id = Identity()
   local actual = Transpose(id)
 
-  lu.assertIsTrue(actual == id)
+  lu.assertEquals(actual, id)
 end
 
 -- Determinants
@@ -283,7 +283,7 @@ function testNonInvertibleMatrixForInvertability()
       {0, 0, 0, 0},
   })
 
-  lu.assertEquals(Determinant(m), 0)
+  lu.assertIsTrue(Determinant(m) == 0)
 end
 
 function testCalculatingTheInverseOfAMatrix()
@@ -307,7 +307,7 @@ function testCalculatingTheInverseOfAMatrix()
   lu.assertEquals(b.at(3, 2), -160/532)
   lu.assertEquals(Cofactor(a, 3, 2), 105)
   lu.assertEquals(b.at(2, 3), 105/532)
-  lu.assertIsTrue(FuzzyEq(b, expectedB))
+  lu.assertIsTrue(b == expectedB)
 end
 
 function testCalculatingTheInverseOfAnotherMatrix()
@@ -325,7 +325,7 @@ function testCalculatingTheInverseOfAnotherMatrix()
       {-0.69231, -0.69231, -0.76923, -1.92308},
   })
 
-  lu.assertIsTrue(FuzzyEq(b, expectedB))
+  lu.assertIsTrue(b == expectedB)
 end
 
 function testCalculatingTheInverseOfAThirdMatrix()
@@ -343,7 +343,7 @@ function testCalculatingTheInverseOfAThirdMatrix()
       {0.17778, 0.06667, -0.26667, 0.33333},
   })
 
-  lu.assertIsTrue(FuzzyEq(b, expectedB))
+  lu.assertIsTrue(b == expectedB)
 end
 
 function testMultiplyAProductByItsInverse()
@@ -363,7 +363,7 @@ function testMultiplyAProductByItsInverse()
 
   local expected = c * Inverse(b)
 
-  lu.assertIsTrue(FuzzyEq(expected, a))
+  lu.assertEquals(expected, a)
 end
 
 function testInvertingIdentityMatrix()
@@ -377,6 +377,37 @@ function testInvertingIdentityMatrix()
   })
 
   lu.assertEquals(0,0)
+end
+
+-- Translation
+
+function testMulitplyATranslationMatrix()
+  local transform = Translation(5, -3, 2)
+  local p = Point(-3, 4, 5)
+
+  local expected = Point(2, 1, 7)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testMultiplyingByTheInverseOfTranslationMatrix()
+  local transform = Translation(5, -3, 2)
+  local inv = Inverse(transform)
+  local p = Point(-3, 4, 5)
+
+  local expected = Point(-8, 7, 3)
+  local actual = inv * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testTranslationDoesNotAffectVectors()
+  local transform = Translation(5, -3, 2)
+  local v = Vector(-3, 4, 5)
+
+  local actual = transform * v
+  lu.assertEquals(actual, v)
 end
 
 os.exit(lu.LuaUnit.run())
