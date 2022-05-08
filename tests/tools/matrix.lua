@@ -481,5 +481,96 @@ function testInverseOfXRotationRotatesInOpposite()
   lu.assertIsTrue(actual == expected)
 end
 
+function testRotatingPointAroundYAxis()
+  local p = Point(0, 0, 1)
+  local halfQuarter = RotationY(math.pi/4)
+  local fullQuarter = RotationY(math.pi/2)
+
+  local expectedHalf = Point(math.sqrt(2)/2, 0, math.sqrt(2)/2)
+  local actualHalf = halfQuarter * p
+
+  local expectedFull = Point(1, 0, 0)
+  local actualFull = fullQuarter * p
+
+  lu.assertIsTrue(actualHalf == expectedHalf)
+  lu.assertIsTrue(actualFull == expectedFull)
+end
+
+function testRotatingPointAroundZAxis()
+  local p = Point(0, 1, 0)
+  local halfQuarter = RotationZ(math.pi/4)
+  local fullQuarter = RotationZ(math.pi/2)
+
+  local expectedHalf = Point(-math.sqrt(2)/2, math.sqrt(2)/2, 0)
+  local actualHalf = halfQuarter * p
+
+  local expectedFull = Point(-1, 0, 0)
+  local actualFull = fullQuarter * p
+
+  lu.assertIsTrue(actualHalf == expectedHalf)
+  lu.assertIsTrue(actualFull == expectedFull)
+end
+
+-- Shearing/Skew
+
+function testShearingTransformationMovesXInProportionToY()
+  local transform = Shearing(1, 0, 0, 0, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(5, 3, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function ShearingTransformationMovezXInProportionToZ()
+  local transform = Shearing(0, 1, 0, 0, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(6, 3, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function ShearingTransformationMovezYInProportionToX()
+  local transform = Shearing(0, 0, 1, 0, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 5, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function ShearingTransformationMovezYInProportionToZ()
+  local transform = Shearing(0, 0, 0, 1, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 7, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function ShearingTransformationMovezZInProportionToX()
+  local transform = Shearing(0, 0, 0, 0, 1, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 3, 6)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function ShearingTransformationMovezZInProportionToY()
+  local transform = Shearing(0, 0, 0, 0, 0, 1)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 3, 7)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
 
 os.exit(lu.LuaUnit.run())

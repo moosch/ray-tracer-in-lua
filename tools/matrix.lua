@@ -276,6 +276,33 @@ matrix.rotationX = function(r)
   })
 end
 
+matrix.rotationY = function(r)
+  return matrix.new({
+      {math.cos(r), 0, math.sin(r), 0},
+      {0, 1, 0, 0},
+      {-math.sin(r), 0, math.cos(r), 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.rotationZ = function(r)
+  return matrix.new({
+      {math.cos(r), -math.sin(r), 0, 0},
+      {math.sin(r), math.cos(r), 0, 0},
+      {0, 0, 1, 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.shearing = function(xy, xz, yx, yz, zx, zy)
+  return matrix.new({
+      {1, xy, xz, 0},
+      {yx, 1, yz, 0},
+      {zx, zy, 1, 0},
+      {0, 0, 0, 1}
+  })
+end
+
 --
 --Create a new matrix. Basically just runs checks on a multidimensional table.
 --A matrix must have equal number of columns and rows, and not be empty.
@@ -351,7 +378,7 @@ Cofactor = function(m, r, c) return matrix.cofactor(m, r, c) end
 Inverse = function(m) return matrix.inverse(m) end
 
 --
---Translation
+--Translation matrix
 --
 --@param x number
 --@param y number
@@ -360,7 +387,7 @@ Inverse = function(m) return matrix.inverse(m) end
 Translation = function(x, y, z) return matrix.translation(x, y, z) end
 
 --
---Scaling
+--Scaling matrix
 --
 --@param x number
 --@param y number
@@ -369,8 +396,34 @@ Translation = function(x, y, z) return matrix.translation(x, y, z) end
 Scaling = function(x, y, z) return matrix.scaling(x, y, z) end
 
 --
---RotationX
+--RotationX matrix
 --
 --@param r number # Radians
 --@return table matrix
 RotationX = function(r) return matrix.rotationX(r) end
+
+--
+--RotationY matrix
+--
+--@param r number # Radians
+--@return table matrix
+RotationY = function(r) return matrix.rotationY(r) end
+
+--
+--RotationZ matrix
+--
+--@param r number # Radians
+--@return table matrix
+RotationZ = function(r) return matrix.rotationZ(r) end
+
+--
+--Shearing matrix
+--
+--@param xy number
+--@param xz number
+--@param yx number
+--@param yz number
+--@param zx number
+--@param zy number
+--@return table matrix
+Shearing = function(xy, xz, yx, yz, zx, zy) return matrix.shearing(xy, xz, yx, yz, zx, zy) end
