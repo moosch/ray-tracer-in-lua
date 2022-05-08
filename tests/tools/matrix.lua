@@ -410,4 +410,76 @@ function testTranslationDoesNotAffectVectors()
   lu.assertEquals(actual, v)
 end
 
+-- Scaling
+
+function testScalingMatrixAppliedToPoint()
+  local transform = Scaling(2, 3, 4)
+  local p = Point(-4, 6, 8)
+
+  local expected = Point(-8, 18, 32)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testScalingMatrixAppliedToVector()
+  local transform = Scaling(2, 3, 4)
+  local v = Vector(-4, 6, 8)
+
+  local expected = Vector(-8, 18, 32)
+  local actual = transform * v
+
+  lu.assertEquals(actual, expected)
+end
+
+function testMultiplyingByInverseOfScalingMatrix()
+  local transform = Scaling(2, 3, 4)
+  local inv = Inverse(transform)
+  local v = Vector(-4, 6, 8)
+
+  local expected = Vector(-2, 2, 2)
+  local actual = inv * v
+
+  lu.assertEquals(actual, expected)
+end
+
+function testReflectionIsScalingByNegativeValue()
+  local transform = Scaling(-1, 1, 1)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(-2, 3, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+-- Rotation
+
+function testRotatingPointAroundXAxis()
+  local p = Point(0, 1, 0)
+  local halfQuarter = RotationX(math.pi/4)
+  local fullQuarter = RotationX(math.pi/2)
+
+  local expectedHalf = Point(0, math.sqrt(2)/2, math.sqrt(2)/2)
+  local actualHalf = halfQuarter * p
+
+  local expectedFull = Point(0, 0, 1)
+  local actualFull = fullQuarter * p
+
+  lu.assertIsTrue(actualHalf == expectedHalf)
+  lu.assertIsTrue(actualFull == expectedFull)
+end
+
+function testInverseOfXRotationRotatesInOpposite()
+  local p = Point(0, 1, 0)
+  local halfQuarter = RotationX(math.pi/4)
+  local inv = Inverse(halfQuarter)
+
+  local expected = Point(0, math.sqrt(2)/2, -math.sqrt(2)/2)
+  local actual = inv * p
+
+  lu.assertIsTrue(actual == expected)
+end
+
+
 os.exit(lu.LuaUnit.run())

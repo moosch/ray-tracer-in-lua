@@ -28,6 +28,22 @@ local function at(m, row, col)
   return rawget(row, col+1)
 end
 
+local function eq(a, b)
+  if a == nil and b == nil then return true end
+  if b.type ~= "matrix" then return false end
+  if a.size ~= b.size then return false end
+
+  local size = a.size
+  for row=1, size, 1 do
+    for col=1, size, 1 do
+      if fuzzyEq(a.at(row-1, col-1), b.at(row-1, col-1)) == false then
+        return false
+      end
+    end
+  end
+  return true
+end
+
 local function mul(a, b)
   -- For each cell in the matrix, find the dot product of the cell's row and column Tuples
   -- Then sum those results
@@ -47,22 +63,6 @@ local function mul(a, b)
   end
 
   return m
-end
-
-local function fuzzy_eq(a, b)
-  if a == nil and b == nil then return true end
-  if b.type ~= "matrix" then return false end
-  if a.size ~= b.size then return false end
-
-  local size = a.size
-  for row=1, size, 1 do
-    for col=1, size, 1 do
-      if fuzzyEq(a.at(row-1, col-1), b.at(row-1, col-1)) == false then
-        return false
-      end
-    end
-  end
-  return true
 end
 
 local function doTupleMul(m, t)
@@ -120,7 +120,7 @@ matrix.new = function(t)
     type = "matrix",
     size = #t,
   }
-  mt.__eq = fuzzy_eq
+  mt.__eq = eq
   mt.__mul = function(a, b)
     if b.type == "matrix" then
       return matrix.new(mul(a, b))
@@ -256,12 +256,25 @@ matrix.translation = function(x, y, z)
       {0, 0, 1, z},
       {0, 0, 0, 1}
   })
-  -- local id = matrix.diagonal(1)
-  -- id = updateAt(id, 0, 3, x)
-  -- id = updateAt(id, 1, 3, y)
-  -- return updateAt(id, 2, 3, z)
 end
 
+matrix.scaling = function(x, y, z)
+  return matrix.new({
+      {x, 0, 0, 0},
+      {0, y, 0, 0},
+      {0, 0, z, 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.rotationX = function(r)
+  return matrix.new({
+      {1, 0, 0, 0},
+      {0, math.cos(r), -(math.sin(r)), 0},
+      {0, math.sin(r), math.cos(r), 0},
+      {0, 0, 0, 1}
+  })
+end
 
 --
 --Create a new matrix. Basically just runs checks on a multidimensional table.
@@ -343,4 +356,21 @@ Inverse = function(m) return matrix.inverse(m) end
 --@param x number
 --@param y number
 --@param z number
+--@return table matrix
 Translation = function(x, y, z) return matrix.translation(x, y, z) end
+
+--
+--Scaling
+--
+--@param x number
+--@param y number
+--@param z number
+--@return table matrix
+Scaling = function(x, y, z) return matrix.scaling(x, y, z) end
+
+--
+--RotationX
+--
+--@param r number # Radians
+--@return table matrix
+RotationX = function(r) return matrix.rotationX(r) end
