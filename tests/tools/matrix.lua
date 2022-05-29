@@ -523,7 +523,7 @@ function testShearingTransformationMovesXInProportionToY()
   lu.assertEquals(actual, expected)
 end
 
-function ShearingTransformationMovezXInProportionToZ()
+function testShearingTransformationMovezXInProportionToZ()
   local transform = Shearing(0, 1, 0, 0, 0, 0)
   local p = Point(2, 3, 4)
 
@@ -533,7 +533,7 @@ function ShearingTransformationMovezXInProportionToZ()
   lu.assertEquals(actual, expected)
 end
 
-function ShearingTransformationMovezYInProportionToX()
+function testShearingTransformationMovezYInProportionToX()
   local transform = Shearing(0, 0, 1, 0, 0, 0)
   local p = Point(2, 3, 4)
 
@@ -543,7 +543,7 @@ function ShearingTransformationMovezYInProportionToX()
   lu.assertEquals(actual, expected)
 end
 
-function ShearingTransformationMovezYInProportionToZ()
+function testShearingTransformationMovezYInProportionToZ()
   local transform = Shearing(0, 0, 0, 1, 0, 0)
   local p = Point(2, 3, 4)
 
@@ -553,7 +553,7 @@ function ShearingTransformationMovezYInProportionToZ()
   lu.assertEquals(actual, expected)
 end
 
-function ShearingTransformationMovezZInProportionToX()
+function testShearingTransformationMovezZInProportionToX()
   local transform = Shearing(0, 0, 0, 0, 1, 0)
   local p = Point(2, 3, 4)
 
@@ -563,13 +563,42 @@ function ShearingTransformationMovezZInProportionToX()
   lu.assertEquals(actual, expected)
 end
 
-function ShearingTransformationMovezZInProportionToY()
+function testShearingTransformationMovezZInProportionToY()
   local transform = Shearing(0, 0, 0, 0, 0, 1)
   local p = Point(2, 3, 4)
 
   local expected = Point(2, 3, 7)
   local actual = transform * p
 
+  lu.assertEquals(actual, expected)
+end
+
+-- Chaining Transformations
+function testIndividualTransformationsAreAppliedInSequence()
+  local p = Point(1, 0, 1)
+  local a = RotationX(math.pi / 2)
+  local b = Scaling(5, 5, 5)
+  local c = Translation(10, 5, 7)
+
+  local p2 = a * p
+  lu.assertIsTrue(p2 == Point(1, -1, 0))
+
+  local p3 = b * p2
+  lu.assertIsTrue(p3 == Point(5, -5, 0))
+
+  local p4 = c * p3
+  lu.assertIsTrue(p4 == Point(15, 0, 7))
+end
+
+function testChainedTransformationsMustBeAppliedInReverseOrder()
+  local p = Point(1, 0, 1)
+  local a = RotationX(math.pi / 2)
+  local b = Scaling(5, 5, 5)
+  local c = Translation(10, 5, 7)
+
+  local t = c * b * a
+  local actual = t * p
+  local expected = Point(15, 0, 7)
   lu.assertEquals(actual, expected)
 end
 
