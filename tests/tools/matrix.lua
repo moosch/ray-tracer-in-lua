@@ -150,14 +150,14 @@ function testTransposingAMatrix()
   })
   local actual = Transpose(m)
 
-  lu.assertIsTrue(actual == expected)
+  lu.assertEquals(actual, expected)
 end
 
 function testTransposingIdentityReturnsIdentity()
   local id = Identity()
   local actual = Transpose(id)
 
-  lu.assertIsTrue(actual == id)
+  lu.assertEquals(actual, id)
 end
 
 -- Determinants
@@ -283,7 +283,7 @@ function testNonInvertibleMatrixForInvertability()
       {0, 0, 0, 0},
   })
 
-  lu.assertEquals(Determinant(m), 0)
+  lu.assertIsTrue(Determinant(m) == 0)
 end
 
 function testCalculatingTheInverseOfAMatrix()
@@ -307,7 +307,7 @@ function testCalculatingTheInverseOfAMatrix()
   lu.assertEquals(b.at(3, 2), -160/532)
   lu.assertEquals(Cofactor(a, 3, 2), 105)
   lu.assertEquals(b.at(2, 3), 105/532)
-  lu.assertIsTrue(FuzzyEq(b, expectedB))
+  lu.assertIsTrue(b == expectedB)
 end
 
 function testCalculatingTheInverseOfAnotherMatrix()
@@ -325,7 +325,7 @@ function testCalculatingTheInverseOfAnotherMatrix()
       {-0.69231, -0.69231, -0.76923, -1.92308},
   })
 
-  lu.assertIsTrue(FuzzyEq(b, expectedB))
+  lu.assertIsTrue(b == expectedB)
 end
 
 function testCalculatingTheInverseOfAThirdMatrix()
@@ -343,7 +343,7 @@ function testCalculatingTheInverseOfAThirdMatrix()
       {0.17778, 0.06667, -0.26667, 0.33333},
   })
 
-  lu.assertIsTrue(FuzzyEq(b, expectedB))
+  lu.assertIsTrue(b == expectedB)
 end
 
 function testMultiplyAProductByItsInverse()
@@ -363,7 +363,7 @@ function testMultiplyAProductByItsInverse()
 
   local expected = c * Inverse(b)
 
-  lu.assertIsTrue(FuzzyEq(expected, a))
+  lu.assertEquals(expected, a)
 end
 
 function testInvertingIdentityMatrix()
@@ -377,6 +377,229 @@ function testInvertingIdentityMatrix()
   })
 
   lu.assertEquals(0,0)
+end
+
+-- Translation
+
+function testMulitplyATranslationMatrix()
+  local transform = Translation(5, -3, 2)
+  local p = Point(-3, 4, 5)
+
+  local expected = Point(2, 1, 7)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testMultiplyingByTheInverseOfTranslationMatrix()
+  local transform = Translation(5, -3, 2)
+  local inv = Inverse(transform)
+  local p = Point(-3, 4, 5)
+
+  local expected = Point(-8, 7, 3)
+  local actual = inv * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testTranslationDoesNotAffectVectors()
+  local transform = Translation(5, -3, 2)
+  local v = Vector(-3, 4, 5)
+
+  local actual = transform * v
+  lu.assertEquals(actual, v)
+end
+
+-- Scaling
+
+function testScalingMatrixAppliedToPoint()
+  local transform = Scaling(2, 3, 4)
+  local p = Point(-4, 6, 8)
+
+  local expected = Point(-8, 18, 32)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testScalingMatrixAppliedToVector()
+  local transform = Scaling(2, 3, 4)
+  local v = Vector(-4, 6, 8)
+
+  local expected = Vector(-8, 18, 32)
+  local actual = transform * v
+
+  lu.assertEquals(actual, expected)
+end
+
+function testMultiplyingByInverseOfScalingMatrix()
+  local transform = Scaling(2, 3, 4)
+  local inv = Inverse(transform)
+  local v = Vector(-4, 6, 8)
+
+  local expected = Vector(-2, 2, 2)
+  local actual = inv * v
+
+  lu.assertEquals(actual, expected)
+end
+
+function testReflectionIsScalingByNegativeValue()
+  local transform = Scaling(-1, 1, 1)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(-2, 3, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+-- Rotation
+
+function testRotatingPointAroundXAxis()
+  local p = Point(0, 1, 0)
+  local halfQuarter = RotationX(math.pi/4)
+  local fullQuarter = RotationX(math.pi/2)
+
+  local expectedHalf = Point(0, math.sqrt(2)/2, math.sqrt(2)/2)
+  local actualHalf = halfQuarter * p
+
+  local expectedFull = Point(0, 0, 1)
+  local actualFull = fullQuarter * p
+
+  lu.assertIsTrue(actualHalf == expectedHalf)
+  lu.assertIsTrue(actualFull == expectedFull)
+end
+
+function testInverseOfXRotationRotatesInOpposite()
+  local p = Point(0, 1, 0)
+  local halfQuarter = RotationX(math.pi/4)
+  local inv = Inverse(halfQuarter)
+
+  local expected = Point(0, math.sqrt(2)/2, -math.sqrt(2)/2)
+  local actual = inv * p
+
+  lu.assertIsTrue(actual == expected)
+end
+
+function testRotatingPointAroundYAxis()
+  local p = Point(0, 0, 1)
+  local halfQuarter = RotationY(math.pi/4)
+  local fullQuarter = RotationY(math.pi/2)
+
+  local expectedHalf = Point(math.sqrt(2)/2, 0, math.sqrt(2)/2)
+  local actualHalf = halfQuarter * p
+
+  local expectedFull = Point(1, 0, 0)
+  local actualFull = fullQuarter * p
+
+  lu.assertIsTrue(actualHalf == expectedHalf)
+  lu.assertIsTrue(actualFull == expectedFull)
+end
+
+function testRotatingPointAroundZAxis()
+  local p = Point(0, 1, 0)
+  local halfQuarter = RotationZ(math.pi/4)
+  local fullQuarter = RotationZ(math.pi/2)
+
+  local expectedHalf = Point(-math.sqrt(2)/2, math.sqrt(2)/2, 0)
+  local actualHalf = halfQuarter * p
+
+  local expectedFull = Point(-1, 0, 0)
+  local actualFull = fullQuarter * p
+
+  lu.assertIsTrue(actualHalf == expectedHalf)
+  lu.assertIsTrue(actualFull == expectedFull)
+end
+
+-- Shearing/Skew
+
+function testShearingTransformationMovesXInProportionToY()
+  local transform = Shearing(1, 0, 0, 0, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(5, 3, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testShearingTransformationMovezXInProportionToZ()
+  local transform = Shearing(0, 1, 0, 0, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(6, 3, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testShearingTransformationMovezYInProportionToX()
+  local transform = Shearing(0, 0, 1, 0, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 5, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testShearingTransformationMovezYInProportionToZ()
+  local transform = Shearing(0, 0, 0, 1, 0, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 7, 4)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testShearingTransformationMovezZInProportionToX()
+  local transform = Shearing(0, 0, 0, 0, 1, 0)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 3, 6)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+function testShearingTransformationMovezZInProportionToY()
+  local transform = Shearing(0, 0, 0, 0, 0, 1)
+  local p = Point(2, 3, 4)
+
+  local expected = Point(2, 3, 7)
+  local actual = transform * p
+
+  lu.assertEquals(actual, expected)
+end
+
+-- Chaining Transformations
+function testIndividualTransformationsAreAppliedInSequence()
+  local p = Point(1, 0, 1)
+  local a = RotationX(math.pi / 2)
+  local b = Scaling(5, 5, 5)
+  local c = Translation(10, 5, 7)
+
+  local p2 = a * p
+  lu.assertIsTrue(p2 == Point(1, -1, 0))
+
+  local p3 = b * p2
+  lu.assertIsTrue(p3 == Point(5, -5, 0))
+
+  local p4 = c * p3
+  lu.assertIsTrue(p4 == Point(15, 0, 7))
+end
+
+function testChainedTransformationsMustBeAppliedInReverseOrder()
+  local p = Point(1, 0, 1)
+  local a = RotationX(math.pi / 2)
+  local b = Scaling(5, 5, 5)
+  local c = Translation(10, 5, 7)
+
+  local t = c * b * a
+  local actual = t * p
+  local expected = Point(15, 0, 7)
+  lu.assertEquals(actual, expected)
 end
 
 os.exit(lu.LuaUnit.run())

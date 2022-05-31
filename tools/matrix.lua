@@ -28,24 +28,19 @@ local function at(m, row, col)
   return rawget(row, col+1)
 end
 
-local function equal(a, b)
-  return table.concat(a) == table.concat(b)
-end
-
 local function eq(a, b)
-  if #a ~= #b then return false end
-  if a.type ~= "matrix" then return false end
-  if b.type ~= "matrix" and b.type ~= "vector" then return false end
+  if a == nil and b == nil then return true end
+  if b.type ~= "matrix" then return false end
+  if a.size ~= b.size then return false end
 
-  -- If b is matrix
-  -- If b is tuple/vector
-
-  for i=1, #a, 1 do
-    if equal(rawget(a, i), rawget(b, i)) == false then
-      return false
+  local size = a.size
+  for row=1, size, 1 do
+    for col=1, size, 1 do
+      if fuzzyEq(a.at(row-1, col-1), b.at(row-1, col-1)) == false then
+        return false
+      end
     end
   end
-
   return true
 end
 
@@ -70,7 +65,7 @@ local function mul(a, b)
   return m
 end
 
-local function mulTuple(m, t)
+local function doTupleMul(m, t)
   local res = {}
   for r = 1, m.size, 1 do
     local w = 1
@@ -80,7 +75,37 @@ local function mulTuple(m, t)
         m.at(r-1, 2) * t.z +
         m.at(r-1, 3) * w
   end
+  return res
+end
+
+local function mulTuple(m, t)
+  local res = doTupleMul(m, t)
   return Tuple(res[1], res[2], res[3], res[4])
+end
+
+local function mulVector(m, v)
+  local res = doTupleMul(m, v)
+  return Vector(res[1], res[2], res[3])
+end
+
+local function mulPoint(m, p)
+  local res = doTupleMul(m, p)
+  return Point(res[1], res[2], res[3], res[4])
+
+end
+
+local function updateAt(m, r, c, val)
+  if #m <= r or #m <= c then
+    error('Cannot update Matrix beyond it\'s size')
+  end
+
+   -- Get row
+  local row = rawget(m, r+1)
+  -- update at column
+  row[c+1] = val
+  -- update matrix row
+  m[r+1] = row
+  return m
 end
 
 matrix.new = function(t)
@@ -103,6 +128,12 @@ matrix.new = function(t)
     if b.type == "tuple" then
       return mulTuple(a, b)
     end
+    if b.type == "vector" then
+      return mulVector(a, b)
+    end
+    if b.type == "point" then
+      return mulPoint(a, b)
+    end
     return a
   end
   mt.__tostring = function(t)
@@ -115,24 +146,6 @@ matrix.new = function(t)
 
   setmetatable(t, mt)
   return t
-end
-
-matrix.fuzzy_eq = function(m1, m2)
-  if m1.type ~= "matrix" then return false end
-  if m2.type ~= "matrix" and m2.type ~= "vector" then
-    return false
-  end
-  if m1.size ~= m2.size then return false end
-
-  local size = m1.size
-  for row=1, size, 1 do
-    for col=1, size, 1 do
-      if fuzzyEq(m1.at(row-1, col-1), m2.at(row-1, col-1)) == false then
-        return false
-      end
-    end
-  end
-  return true
 end
 
 matrix.diagonal = function(n, size)
@@ -236,6 +249,59 @@ matrix.inverse = function(m)
   return matrix.new(mat)
 end
 
+matrix.translation = function(x, y, z)
+  return matrix.new({
+      {1, 0, 0, x},
+      {0, 1, 0, y},
+      {0, 0, 1, z},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.scaling = function(x, y, z)
+  return matrix.new({
+      {x, 0, 0, 0},
+      {0, y, 0, 0},
+      {0, 0, z, 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.rotationX = function(r)
+  return matrix.new({
+      {1, 0, 0, 0},
+      {0, math.cos(r), -(math.sin(r)), 0},
+      {0, math.sin(r), math.cos(r), 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.rotationY = function(r)
+  return matrix.new({
+      {math.cos(r), 0, math.sin(r), 0},
+      {0, 1, 0, 0},
+      {-math.sin(r), 0, math.cos(r), 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.rotationZ = function(r)
+  return matrix.new({
+      {math.cos(r), -math.sin(r), 0, 0},
+      {math.sin(r), math.cos(r), 0, 0},
+      {0, 0, 1, 0},
+      {0, 0, 0, 1}
+  })
+end
+
+matrix.shearing = function(xy, xz, yx, yz, zx, zy)
+  return matrix.new({
+      {1, xy, xz, 0},
+      {yx, 1, yz, 0},
+      {zx, zy, 1, 0},
+      {0, 0, 0, 1}
+  })
+end
 
 --
 --Create a new matrix. Basically just runs checks on a multidimensional table.
@@ -312,9 +378,52 @@ Cofactor = function(m, r, c) return matrix.cofactor(m, r, c) end
 Inverse = function(m) return matrix.inverse(m) end
 
 --
---FuzzyEq Matrices
+--Translation matrix
 --
---@param m1 table # Matrix
---@param m2 table # Matrix
---@return boolean equals
-FuzzyEq = function(m1, m2) return matrix.fuzzy_eq(m1, m2) end
+--@param x number
+--@param y number
+--@param z number
+--@return table matrix
+Translation = function(x, y, z) return matrix.translation(x, y, z) end
+
+--
+--Scaling matrix
+--
+--@param x number
+--@param y number
+--@param z number
+--@return table matrix
+Scaling = function(x, y, z) return matrix.scaling(x, y, z) end
+
+--
+--RotationX matrix
+--
+--@param r number # Radians
+--@return table matrix
+RotationX = function(r) return matrix.rotationX(r) end
+
+--
+--RotationY matrix
+--
+--@param r number # Radians
+--@return table matrix
+RotationY = function(r) return matrix.rotationY(r) end
+
+--
+--RotationZ matrix
+--
+--@param r number # Radians
+--@return table matrix
+RotationZ = function(r) return matrix.rotationZ(r) end
+
+--
+--Shearing matrix
+--
+--@param xy number
+--@param xz number
+--@param yx number
+--@param yz number
+--@param zx number
+--@param zy number
+--@return table matrix
+Shearing = function(xy, xz, yx, yz, zx, zy) return matrix.shearing(xy, xz, yx, yz, zx, zy) end
