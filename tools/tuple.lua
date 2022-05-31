@@ -394,6 +394,7 @@ end
 --@param w number
 --@return table tuple
 Tuple = function(x, y, z, w) return tuple.new(x, y, z, w) end
+
 --
 --Create new Vector
 --
@@ -402,6 +403,7 @@ Tuple = function(x, y, z, w) return tuple.new(x, y, z, w) end
 --@param z number
 --@return table vector
 Vector = function(x, y, z) return vector.new(x, y, z) end
+
 --
 --Create new Point
 --
@@ -410,6 +412,7 @@ Vector = function(x, y, z) return vector.new(x, y, z) end
 --@param z number
 --@return table point
 Point = function(x, y, z) return point.new(x, y, z) end
+
 --
 --Create new Color
 --
@@ -426,12 +429,14 @@ Color = function(r, g, b, a) return color.new(r, g, b, a) end
 --@param v table # Vector to be normalized
 --@return table vector
 Normalize = function(v) return normalize(v) end
+
 --
 --Get magnitude (length) of a vector
 --
 --@param v table # Vector
 --@return number magnitude
 Magnitude = function(v) return magnitude(v) end
+
 --
 --Dot Product of two vectors
 --
@@ -439,6 +444,7 @@ Magnitude = function(v) return magnitude(v) end
 --@param b table # Vector
 --@return number dotproduct
 Dot = function(a, b) return dotProduct(a, b) end
+
 --
 --Cross Product of two vectors
 --
@@ -446,6 +452,7 @@ Dot = function(a, b) return dotProduct(a, b) end
 --@param b table # Vector
 --@return number crossproduct
 Cross = function(a, b) return crossProduct(a, b) end
+
 --
 --Sum of vector values
 --
